@@ -62,6 +62,10 @@ Todas as rotas (exceto auth) exigem `Authorization: Bearer <token>`.
 
 ---
 
+## Arquitetura
+
+![Arquitetura](./docs/architecture.png)
+
 ## Respostas conceituais
 
 ### 1. Como modelei as entidades?
