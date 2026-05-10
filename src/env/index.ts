@@ -1,6 +1,7 @@
 import * as z from "zod";
 
 const envSchema = z.object({
+  APP_URL: z.string().default("http://localhost:3333"),
   REDIS_HOST: z.string().default("localhost"),
   REDIS_PORT: z.string().default("6379"),
   REDIS_PASSWORD: z.string().nonempty(),

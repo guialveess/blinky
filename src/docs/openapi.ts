@@ -1,3 +1,5 @@
+import { env } from "../env";
+
 const bearerAuth = {
   bearerAuth: [],
 };
@@ -11,7 +13,8 @@ export const openApiSpec = {
     version: "1.0.0",
   },
   servers: [
-    { url: "http://localhost:3333/api", description: "Desenvolvimento" },
+    { url: `${env.APP_URL}/api`, description: "Servidor atual" },
+    { url: "http://localhost:3333/api", description: "Local" },
   ],
   components: {
     securitySchemes: {
