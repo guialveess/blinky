@@ -91,20 +91,20 @@ Modelar os parâmetros como N:N foi a decisão central. Um `utm_source=facebook`
 
 ### 2. Quais decisões tomei e por quê?
 
-**Drizzle no lugar do Prisma** — preferi porque as queries ficam em TypeScript puro, sem ter que aprender uma DSL própria. As migrations também são mais previsíveis.
+**Drizzle no lugar do Prisma:** preferi porque as queries ficam em TypeScript puro, sem ter que aprender uma DSL própria. As migrations também são mais previsíveis.
 
-**Parâmetros reutilizáveis (N:N)** — se cada link tivesse seus próprios parâmetros, trocar `utm_source=google` para `bing` em 200 links seria inviável. Com N:N, mudo uma linha e todos os links já refletem.
+**Parâmetros reutilizáveis (N:N):** se cada link tivesse seus próprios parâmetros, trocar `utm_source=google` para `bing` em 200 links seria inviável. Com N:N, mudo uma linha e todos os links já refletem.
 
-**Cache no `/generate`** — esse endpoint faz três queries (link, parâmetros e redirect). Como pode ser chamado com frequência, cachear por 5 minutos faz sentido. Invalido o cache sempre que algo muda, então não tem risco de retornar dado desatualizado.
+**Cache no `/generate`:** esse endpoint faz três queries (link, parâmetros e redirect). Como pode ser chamado com frequência, cachear por 5 minutos faz sentido. Invalido o cache sempre que algo muda, então não tem risco de retornar dado desatualizado.
 
-**JWT sem refresh token** — para o escopo desse projeto é suficiente. Adicionar refresh token ia aumentar a complexidade sem contribuir para o que está sendo avaliado.
+**JWT sem refresh token:** para o escopo desse projeto é suficiente. Adicionar refresh token ia aumentar a complexidade sem contribuir para o que está sendo avaliado.
 
-**Zod para validação** — além de barrar entrada inválida, os schemas funcionam como documentação do contrato de cada rota. Ficam em arquivos separados por domínio, fácil de encontrar e alterar.
+**Zod para validação:** além de barrar entrada inválida, os schemas funcionam como documentação do contrato de cada rota. Ficam em arquivos separados por domínio, fácil de encontrar e alterar.
 
 ### 3. Como isso resolve o problema de escala?
 
 O problema é simples: editar parâmetros em muitos links um a um não escala.
 
-Minha solução é que o parâmetro existe independente do link. Associo ele a quantos links precisar, e quando o valor muda, atualizo só o parâmetro. Na próxima chamada ao `/generate`, todos os links já saem com o valor novo — o cache invalida automaticamente.
+Minha solução é que o parâmetro existe independente do link. Associo ele a quantos links precisar, e quando o valor muda, atualizo só o parâmetro. Na próxima chamada ao `/generate`, todos os links já saem com o valor novo, o cache invalida automaticamente.
 
 Não preciso tocar em link nenhum individualmente.
