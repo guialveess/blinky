@@ -7,7 +7,7 @@ export const openApiSpec = {
   info: {
     title: "Blinky API — BeWork",
     description:
-      "API desenvolvida para o processo seletivo da BeWork. Geração dinâmica de URLs com parâmetros e redirects.",
+      "API para geração dinâmica de URLs com parâmetros e redirects.",
     version: "1.0.0",
   },
   servers: [
