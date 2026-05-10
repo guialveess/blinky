@@ -7,6 +7,8 @@ import { linksParametersTable } from "../db/schema/links_parameters";
 import { redirectsTable } from "../db/schema/redirects";
 import { redis } from "../lib/redis";
 
+const GENERATE_CACHE_TTL = 300;
+
 export async function getLinkOwnedByUser(id: string, userId: string) {
   const [result] = await db
     .select({ link: linksTable })
@@ -27,7 +29,9 @@ export async function createLink(
   const [project] = await db
     .select()
     .from(projectsTable)
-    .where(and(eq(projectsTable.id, projectId), eq(projectsTable.userId, userId)));
+    .where(
+      and(eq(projectsTable.id, projectId), eq(projectsTable.userId, userId)),
+    );
 
   if (!project) throw new Error("Projeto não encontrado");
 
@@ -43,11 +47,16 @@ export async function listLinks(userId: string, projectId: string) {
   const [project] = await db
     .select()
     .from(projectsTable)
-    .where(and(eq(projectsTable.id, projectId), eq(projectsTable.userId, userId)));
+    .where(
+      and(eq(projectsTable.id, projectId), eq(projectsTable.userId, userId)),
+    );
 
   if (!project) throw new Error("Projeto não encontrado");
 
-  return db.select().from(linksTable).where(eq(linksTable.projectId, projectId));
+  return db
+    .select()
+    .from(linksTable)
+    .where(eq(linksTable.projectId, projectId));
 }
 
 export async function getLink(id: string, userId: string) {
@@ -93,7 +102,12 @@ export async function addParameterToLink(
   const [parameter] = await db
     .select()
     .from(parametersTable)
-    .where(and(eq(parametersTable.id, parameterId), eq(parametersTable.userId, userId)));
+    .where(
+      and(
+        eq(parametersTable.id, parameterId),
+        eq(parametersTable.userId, userId),
+      ),
+    );
 
   if (!parameter) throw new Error("Parâmetro não encontrado");
 
@@ -102,6 +116,8 @@ export async function addParameterToLink(
     .values({ linkId, parameterId })
     .onConflictDoNothing()
     .returning();
+
+  if (!association) throw new Error("Parâmetro já associado a este link");
 
   await redis.del(`link:generate:${linkId}`);
   return association;
@@ -139,7 +155,10 @@ export async function generateLink(id: string, userId: string) {
   const params = await db
     .select({ parameter: parametersTable })
     .from(linksParametersTable)
-    .innerJoin(parametersTable, eq(linksParametersTable.parameterId, parametersTable.id))
+    .innerJoin(
+      parametersTable,
+      eq(linksParametersTable.parameterId, parametersTable.id),
+    )
     .where(eq(linksParametersTable.linkId, id));
 
   const [redirectRow] = await db
@@ -156,7 +175,11 @@ export async function generateLink(id: string, userId: string) {
   }
 
   const result = { url: url.toString() };
-  await redis.setex(`link:generate:${id}`, 300, JSON.stringify(result));
+  await redis.setex(
+    `link:generate:${id}`,
+    GENERATE_CACHE_TTL,
+    JSON.stringify(result),
+  );
 
   return result;
 }

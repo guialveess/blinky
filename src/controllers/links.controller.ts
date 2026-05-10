@@ -10,125 +10,64 @@ import {
   removeParameterFromLink,
   generateLink,
 } from "../services/links.service";
+import { asyncHandler } from "../lib/async-handler";
 
-export async function createLinkController(req: Request, res: Response) {
+export const createLinkController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { projectId, name, baseUrl } = req.body;
+  const link = await createLink(userId, projectId, name, baseUrl);
+  res.status(201).json(link);
+});
 
-  try {
-    const link = await createLink(userId, projectId, name, baseUrl);
-    return res.status(201).json(link);
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
-
-export async function listLinksController(req: Request, res: Response) {
+export const listLinksController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { projectId } = req.query as { projectId: string };
+  const links = await listLinks(userId, projectId);
+  res.status(200).json(links);
+});
 
-  try {
-    const links = await listLinks(userId, projectId);
-    return res.status(200).json(links);
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
-
-export async function getLinkController(req: Request, res: Response) {
+export const getLinkController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { id } = req.params as { id: string };
+  const link = await getLink(id, userId);
+  res.status(200).json(link);
+});
 
-  try {
-    const link = await getLink(id, userId);
-    return res.status(200).json(link);
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
-
-export async function updateLinkController(req: Request, res: Response) {
+export const updateLinkController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { id } = req.params as { id: string };
   const { name, baseUrl } = req.body;
+  const link = await updateLink(id, userId, { name, baseUrl });
+  res.status(200).json(link);
+});
 
-  try {
-    const link = await updateLink(id, userId, { name, baseUrl });
-    return res.status(200).json(link);
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
-
-export async function deleteLinkController(req: Request, res: Response) {
+export const deleteLinkController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { id } = req.params as { id: string };
+  await deleteLink(id, userId);
+  res.status(200).json({ message: "Link deletado com sucesso" });
+});
 
-  try {
-    await deleteLink(id, userId);
-    return res.status(200).json({ message: "Link deletado com sucesso" });
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
-
-export async function addParameterToLinkController(req: Request, res: Response) {
+export const addParameterToLinkController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { id: linkId } = req.params as { id: string };
   const { parameterId } = req.body;
+  const association = await addParameterToLink(linkId, parameterId, userId);
+  res.status(201).json(association);
+});
 
-  try {
-    const association = await addParameterToLink(linkId, parameterId, userId);
-    return res.status(201).json(association);
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
-
-export async function removeParameterFromLinkController(req: Request, res: Response) {
-  const { id: userId } = req.user as JwtPayload;
-  const { id: linkId, parameterId } = req.params as { id: string; parameterId: string };
-
-  try {
+export const removeParameterFromLinkController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id: userId } = req.user as JwtPayload;
+    const { id: linkId, parameterId } = req.params as { id: string; parameterId: string };
     await removeParameterFromLink(linkId, parameterId, userId);
-    return res.status(200).json({ message: "Parâmetro removido do link com sucesso" });
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
+    res.status(200).json({ message: "Parâmetro removido do link com sucesso" });
+  },
+);
 
-export async function generateLinkController(req: Request, res: Response) {
+export const generateLinkController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { id } = req.params as { id: string };
-
-  try {
-    const result = await generateLink(id, userId);
-    return res.status(200).json(result);
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
+  const result = await generateLink(id, userId);
+  res.status(200).json(result);
+});

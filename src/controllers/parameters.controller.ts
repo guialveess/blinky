@@ -5,47 +5,24 @@ import {
   listParameters,
   deleteParameter,
 } from "../services/parameters.service";
+import { asyncHandler } from "../lib/async-handler";
 
-export async function createParameterController(req: Request, res: Response) {
+export const createParameterController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { key, value } = req.body;
+  const parameter = await createParameter(userId, key, value);
+  res.status(201).json(parameter);
+});
 
-  try {
-    const parameter = await createParameter(userId, key, value);
-    return res.status(201).json(parameter);
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
-
-export async function listParametersController(req: Request, res: Response) {
+export const listParametersController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
+  const parameters = await listParameters(userId);
+  res.status(200).json(parameters);
+});
 
-  try {
-    const parameters = await listParameters(userId);
-    return res.status(200).json(parameters);
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
-
-export async function deleteParameterController(req: Request, res: Response) {
+export const deleteParameterController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { id } = req.params as { id: string };
-
-  try {
-    await deleteParameter(id, userId);
-    return res.status(200).json({ message: "Parâmetro deletado com sucesso" });
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
+  await deleteParameter(id, userId);
+  res.status(200).json({ message: "Parâmetro deletado com sucesso" });
+});

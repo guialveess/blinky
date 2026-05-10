@@ -5,50 +5,27 @@ import {
   updateRedirect,
   deleteRedirect,
 } from "../services/redirects.service";
+import { asyncHandler } from "../lib/async-handler";
 
-export async function createRedirectController(req: Request, res: Response) {
+export const createRedirectController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { id: linkId } = req.params as { id: string };
   const { redirectUrl } = req.body;
+  const redirect = await createRedirect(linkId, userId, redirectUrl);
+  res.status(201).json(redirect);
+});
 
-  try {
-    const redirect = await createRedirect(linkId, userId, redirectUrl);
-    return res.status(201).json(redirect);
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
-
-export async function updateRedirectController(req: Request, res: Response) {
+export const updateRedirectController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { id: linkId } = req.params as { id: string };
   const { redirectUrl } = req.body;
+  const redirect = await updateRedirect(linkId, userId, redirectUrl);
+  res.status(200).json(redirect);
+});
 
-  try {
-    const redirect = await updateRedirect(linkId, userId, redirectUrl);
-    return res.status(200).json(redirect);
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
-
-export async function deleteRedirectController(req: Request, res: Response) {
+export const deleteRedirectController = asyncHandler(async (req: Request, res: Response) => {
   const { id: userId } = req.user as JwtPayload;
   const { id: linkId } = req.params as { id: string };
-
-  try {
-    await deleteRedirect(linkId, userId);
-    return res.status(200).json({ message: "Redirect removido com sucesso" });
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
-    }
-    return res.status(500).json({ message: "Erro interno" });
-  }
-}
+  await deleteRedirect(linkId, userId);
+  res.status(200).json({ message: "Redirect removido com sucesso" });
+});
