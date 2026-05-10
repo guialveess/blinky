@@ -12,10 +12,7 @@ export const openApiSpec = {
       "API para geração dinâmica de URLs com parâmetros e redirects.",
     version: "1.0.0",
   },
-  servers: [
-    { url: `${env.APP_URL}/api`, description: "Servidor atual" },
-    { url: "http://localhost:3333/api", description: "Local" },
-  ],
+  servers: [{ url: `${env.APP_URL}/api` }],
   components: {
     securitySchemes: {
       bearerAuth: {
