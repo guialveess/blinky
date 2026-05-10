@@ -1,7 +1,9 @@
 import "dotenv/config";
 import express from "express";
 import { apiReference } from "@scalar/express-api-reference";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { env } from "./env/index";
+import { db } from "./db/client";
 import routes from "./routes";
 import { openApiSpec } from "./docs/openapi";
 
@@ -35,6 +37,13 @@ app.get("/health", (req, res) => {
   res.send({ status: "ok" });
 });
 
-app.listen(env.PORT, () => {
-  console.log(`Rodando na porta ${env.PORT}...`);
-});
+migrate(db, { migrationsFolder: "./drizzle/migrations" })
+  .then(() => {
+    app.listen(env.PORT, () => {
+      console.log(`Rodando na porta ${env.PORT}...`);
+    });
+  })
+  .catch((err) => {
+    console.error("Falha ao rodar migrations:", err);
+    process.exit(1);
+  });
