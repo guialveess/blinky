@@ -42,6 +42,19 @@ O servidor vai responder em `http://localhost:3333`.
 
 A documentação interativa está disponível em `http://localhost:3333/docs`.
 
+## Testes
+
+Os testes ficam em `tests/` e rodam sem nenhuma infra (sem banco, sem Redis).
+
+```bash
+bun test
+```
+
+Cobertura atual:
+
+- **`asyncHandler`** — os três caminhos: sucesso, erro de negócio (→ 400) e erro inesperado (→ 500)
+- **Schemas Zod** — happy path e casos de borda para auth, links e parameters
+
 ## Endpoints
 
 | Método | Rota | Descrição |
