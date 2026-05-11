@@ -42,6 +42,12 @@ O servidor vai responder em `http://localhost:3333`.
 
 A documentação interativa está disponível em `http://localhost:3333/docs`.
 
+## API em produção
+
+Base URL: `https://blinky-8g77.onrender.com`
+
+Documentação interativa: `https://blinky-8g77.onrender.com/docs`
+
 ## Testes
 
 Os testes ficam em `tests/` e rodam sem nenhuma infra (sem banco, sem Redis).
