@@ -43,7 +43,15 @@ export async function createLink(
   return link;
 }
 
-export async function listLinks(userId: string, projectId: string) {
+export async function listLinks(
+  userId: string,
+  projectId: string,
+  page = 1,
+  limit = 20,
+) {
+  const safeLimit = Math.min(limit, 100);
+  const offset = (page - 1) * safeLimit;
+
   const [project] = await db
     .select()
     .from(projectsTable)
@@ -51,12 +59,23 @@ export async function listLinks(userId: string, projectId: string) {
       and(eq(projectsTable.id, projectId), eq(projectsTable.userId, userId)),
     );
 
-  if (!project) throw new Error("Projeto não encontrado");
+  if (!project) {
+    throw new Error("Projeto não encontrado");
+  }
 
-  return db
-    .select()
+  const links = await db
+    .select({
+      id: linksTable.id,
+      slug: linksTable.name,
+      baseUrl: linksTable.baseUrl,
+      createdAt: linksTable.createdAt,
+    })
     .from(linksTable)
-    .where(eq(linksTable.projectId, projectId));
+    .where(eq(linksTable.projectId, projectId))
+    .limit(safeLimit)
+    .offset(offset);
+
+  return links;
 }
 
 export async function getLink(id: string, userId: string) {
